@@ -1,31 +1,125 @@
-function doPost(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Veriler"); 
-    if (!sheet) throw new Error("Sayfa bulunamadı! Lütfen 'Veriler' adlı bir sayfa oluşturun.");
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SANOVİS Katılımcı Anketi</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+</head>
+<body>
 
-    var data = e.parameter;
-    if (!data) throw new Error("Form verisi alınamadı!");
+    <section class="hero is-primary is-bold">
+        <div class="hero-body">
+            <div class="container">
+                <h1 class="title">SANOVİS Katılımcı Anketi</h1>
+            </div>
+        </div>
+    </section>
 
-    var headers = ["Timestamp", "Email", "Telefon", "RevolaxZiyaret", "PolytechBilgi", 
-                   "PolytechKullanmama", "PolytechKullanici", "SanovisIletisim"]; 
-    
-    var newRow = [new Date().toLocaleString()]; // İlk sütuna tarih ekleyelim
+    <div class="container mt-5">
+        <form id="survey-form" class="box">
+            <div class="field">
+                <label class="label">Email</label>
+                <div class="control">
+                    <input class="input" type="email" name="Email" required>
+                </div>
+            </div>
 
-    headers.slice(1).forEach(function(header) {
-      if (data[header]) {
-        if (Array.isArray(data[header])) {
-          newRow.push(data[header].join(", ")); // Checkbox verilerini virgülle birleştir
-        } else {
-          newRow.push(data[header]);
+            <div class="field">
+                <label class="label">Telefon</label>
+                <div class="control">
+                    <input class="input" type="text" name="Telefon" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Revolax standını ziyaret etmek ister misiniz?</label>
+                <div class="control">
+                    <label class="radio"><input type="radio" name="RevolaxZiyaret" value="Evet"> Evet</label>
+                    <label class="radio"><input type="radio" name="RevolaxZiyaret" value="Hayır"> Hayır</label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Polytech'i neden kullanmıyorsunuz?</label>
+                <div class="control">
+                    <label class="checkbox"><input type="checkbox" name="PolytechSebep" value="Fiyat"> Fiyat</label>
+                    <label class="checkbox"><input type="checkbox" name="PolytechSebep" value="Ürün bilgisi eksikliği"> Ürün bilgisi eksikliği</label>
+                    <label class="checkbox"><input type="checkbox" name="PolytechSebep" value="Alternatif ürün tercih ediyorum"> Alternatif ürün tercih ediyorum</label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Polytech hakkında bilginiz var mı?</label>
+                <div class="control">
+                    <label class="radio"><input type="radio" name="PolytechBilgi" value="Evet"> Evet</label>
+                    <label class="radio"><input type="radio" name="PolytechBilgi" value="Hayır"> Hayır</label>
+                </div>
+            </div>
+
+            <div class="field">
+                <label class="label">Sanovis ile nasıl iletişime geçmek istersiniz?</label>
+                <div class="control">
+                    <label class="checkbox"><input type="checkbox" name="SanovisIletisim" value="Telefon"> Telefon</label>
+                    <label class="checkbox"><input type="checkbox" name="SanovisIletisim" value="E-posta"> E-posta</label>
+                    <label class="checkbox"><input type="checkbox" name="SanovisIletisim" value="WhatsApp"> WhatsApp</label>
+                </div>
+            </div>
+
+            <div class="field is-grouped">
+                <div class="control">
+                    <button class="button is-primary" type="submit">Gönder</button>
+                </div>
+                <div class="control">
+                    <button class="button is-danger" type="reset">İptal</button>
+                </div>
+            </div>
+        </form>
+
+        <div id="message" class="notification is-hidden"></div>
+    </div>
+
+    <script>
+        document.getElementById("survey-form").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var formData = new FormData(event.target);
+            var data = {};
+
+            formData.forEach((value, key) => {
+                if (data[key]) {
+                    data[key] = data[key] + ", " + value; // Checkbox seçimlerini virgülle ayır
+                } else {
+                    data[key] = value;
+                }
+            });
+
+            fetch("https://script.google.com/macros/s/AKfycbxypZl7BLS5ZHbubLI-ExGS4YD_A8AknptRKkw8RQGiV0l1mibqsDZtiozamJ_74Argvg/exec", {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                body: new URLSearchParams(data).toString()
+            })
+            .then(response => {
+                showMessage("Başarıyla kaydedildi!", "is-success");
+                event.target.reset();
+            })
+            .catch(error => {
+                showMessage("Hata oluştu: " + error, "is-danger");
+            });
+        });
+
+        function showMessage(text, type) {
+            var messageDiv = document.getElementById("message");
+            messageDiv.textContent = text;
+            messageDiv.className = "notification " + type;
+            messageDiv.style.display = "block";
+
+            setTimeout(() => {
+                messageDiv.style.display = "none";
+            }, 3000);
         }
-      } else {
-        newRow.push(""); // Eksik değerler için boş bırak
-      }
-    });
+    </script>
 
-    sheet.appendRow(newRow);
-    return ContentService.createTextOutput("Başarıyla kaydedildi").setMimeType(ContentService.MimeType.TEXT);
-  } catch (error) {
-    return ContentService.createTextOutput("Hata: " + error.message).setMimeType(ContentService.MimeType.TEXT);
-  }
-}
+</body>
+</html>
