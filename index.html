@@ -1,31 +1,111 @@
-function doPost(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Veriler"); 
-    if (!sheet) throw new Error("Sayfa bulunamadı! Lütfen 'Veriler' adlı bir sayfa oluşturun.");
-
-    var data = e.parameter;
-    if (!data) throw new Error("Form verisi alınamadı!");
-
-    var headers = ["Timestamp", "Email", "Telefon", "RevolaxZiyaret", "PolytechBilgi", 
-                   "PolytechKullanmama", "PolytechKullanici", "SanovisIletisim"]; 
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
+  </head>
+  <body>
+    <section class="hero is-primary is-bold">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">Sanovis Katılımcı Anketi</h1>
+        </div>
+      </div>
+    </section>
+    <form id="form" class="container m-4 pl-4" method="POST">
+      <div class="field">
+        <label class="label">Email</label>
+        <div class="control">
+          <input class="input" type="email" name="Email" required />
+        </div>
+      </div>
+      
+      <div class="field">
+        <label class="label">Telefon</label>
+        <div class="control">
+          <input class="input" type="text" name="Telefon" required />
+        </div>
+      </div>
+      
+      <div class="field">
+        <label class="label">Revolax standını ziyaret etmek ister misiniz?</label>
+        <div class="control">
+          <label class="radio"><input type="radio" name="RevolaxZiyaret" value="Evet" /> Evet</label>
+          <label class="radio"><input type="radio" name="RevolaxZiyaret" value="Hayır" /> Hayır</label>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label class="label">Polytech'i neden kullanmıyorsunuz?</label>
+        <div class="control">
+          <label class="checkbox"><input type="checkbox" name="PolytechSebep" value="Fiyat" /> Fiyat</label>
+          <label class="checkbox"><input type="checkbox" name="PolytechSebep" value="Temin Sorunu" /> Temin Sorunu</label>
+          <label class="checkbox"><input type="checkbox" name="PolytechSebep" value="Kalite Yetersiz" /> Kalite Yetersiz</label>
+        </div>
+      </div>
+      
+      <div class="field">
+        <label class="label">Sanovis ile nasıl iletişime geçmek istersiniz?</label>
+        <div class="control">
+          <label class="checkbox"><input type="checkbox" name="SanovisIletisim" value="Telefon" /> Telefon</label>
+          <label class="checkbox"><input type="checkbox" name="SanovisIletisim" value="E-posta" /> E-posta</label>
+          <label class="checkbox"><input type="checkbox" name="SanovisIletisim" value="WhatsApp" /> WhatsApp</label>
+        </div>
+      </div>
+      
+      <div class="field is-grouped">
+        <div class="control">
+          <button class="button is-primary" type="submit" id="submit-button">Gönder</button>
+        </div>
+      </div>
+    </form>
     
-    var newRow = [new Date().toLocaleString()]; // İlk sütuna tarih ekleyelim
+    <div id="message" class="notification is-hidden"></div>
+    
+    <script>
+      document.getElementById("form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        document.getElementById("message").textContent = "Gönderiliyor...";
+        document.getElementById("message").classList.remove("is-hidden");
 
-    headers.slice(1).forEach(function(header) {
-      if (data[header]) {
-        if (Array.isArray(data[header])) {
-          newRow.push(data[header].join(", ")); // Checkbox verilerini virgülle birleştir
-        } else {
-          newRow.push(data[header]);
+        var formData = new FormData(this);
+        var keyValuePairs = [];
+        for (var pair of formData.entries()) {
+          keyValuePairs.push(pair[0] + "=" + pair[1]);
         }
-      } else {
-        newRow.push(""); // Eksik değerler için boş bırak
-      }
-    });
 
-    sheet.appendRow(newRow);
-    return ContentService.createTextOutput("Başarıyla kaydedildi").setMimeType(ContentService.MimeType.TEXT);
-  } catch (error) {
-    return ContentService.createTextOutput("Hata: " + error.message).setMimeType(ContentService.MimeType.TEXT);
-  }
-}
+        var formDataString = keyValuePairs.join("&");
+
+        fetch(
+          "https://script.google.com/macros/s/AKfycbxypZl7BLS5ZHbubLI-ExGS4YD_A8AknptRKkw8RQGiV0l1mibqsDZtiozamJ_74Argvg/exec",
+          {
+            redirect: "follow",
+            method: "POST",
+            body: formDataString,
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8",
+            },
+          }
+        )
+          .then((response) => {
+            if (response) {
+              return response;
+            } else {
+              throw new Error("Gönderme başarısız.");
+            }
+          })
+          .then(() => {
+            document.getElementById("message").textContent = "Başarıyla gönderildi!";
+            document.getElementById("message").classList.add("is-success");
+            document.getElementById("form").reset();
+          })
+          .catch((error) => {
+            document.getElementById("message").textContent = "Hata oluştu: " + error;
+            document.getElementById("message").classList.add("is-danger");
+          });
+      });
+    </script>
+  </body>
+</html>
