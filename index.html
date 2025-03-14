@@ -3,54 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANOVİS Katılımcı Anketi</title>
+    <title>Anket Formu</title>
 </head>
 <body>
     <h2>SANOVİS Katılımcı Anketi</h2>
-    <form id="surveyForm">
+    <form id="anketForm">
         <label>Email:</label>
         <input type="email" name="Email" required><br><br>
-        
+
         <label>Telefon:</label>
         <input type="tel" name="Telefon" required><br><br>
-        
-        <label>Revolax standını ziyaret ettiniz mi?</label><br>
-        <input type="radio" name="RevolaxZiyaret" value="Evet"> Evet
-        <input type="radio" name="RevolaxZiyaret" value="Hayır"> Hayır
-        <br><br>
 
-        <label>Polytech’i neden kullanmıyorsunuz? (Birden fazla seçebilirsiniz)</label><br>
-        <input type="checkbox" name="PolytechSebep[]" value="Fiyat"> Fiyat
-        <input type="checkbox" name="PolytechSebep[]" value="Ürün bilgisi eksikliği"> Ürün bilgisi eksikliği
-        <input type="checkbox" name="PolytechSebep[]" value="Alternatif ürün tercih ediyorum"> Alternatif ürün tercih ediyorum
-        <br><br>
-        
-        <label>Polytech hakkında bilginiz var mı?</label><br>
-        <input type="radio" name="PolytechBilgi" value="Evet"> Evet
-        <input type="radio" name="PolytechBilgi" value="Hayır"> Hayır
-        <br><br>
+        <label>Revolax Ziyaret:</label>
+        <input type="text" name="RevolaxZiyaret"><br><br>
 
-        <label>Sanovis ile nasıl iletişime geçmek istersiniz? (Birden fazla seçebilirsiniz)</label><br>
-        <input type="checkbox" name="SanovisIletisim[]" value="Telefon"> Telefon
-        <input type="checkbox" name="SanovisIletisim[]" value="E-posta"> E-posta
-        <input type="checkbox" name="SanovisIletisim[]" value="WhatsApp"> WhatsApp
-        <br><br>
-        
+        <label>Polytech Sebep:</label>
+        <input type="text" name="PolytechSebep"><br><br>
+
+        <label>Polytech Bilgi:</label>
+        <input type="text" name="PolytechBilgi"><br><br>
+
+        <label>Polytech Kullanmama:</label>
+        <input type="text" name="PolytechKullanmama"><br><br>
+
+        <label>Polytech Kullanıcı:</label>
+        <input type="text" name="PolytechKullanici"><br><br>
+
+        <label>Sanovis İletişim:</label>
+        <input type="text" name="SanovisIletisim"><br><br>
+
         <button type="submit">Gönder</button>
     </form>
-    
+
+    <p id="sonuc"></p>
+
     <script>
-        document.getElementById("surveyForm").addEventListener("submit", function(event) {
+        document.getElementById("anketForm").addEventListener("submit", function(event) {
             event.preventDefault();
-            let formData = new FormData(this);
-            fetch("https://script.google.com/macros/s/AKfycbxp6L6k1ateTmEJCsfIyUTepkFP0KPJ82z55IhIksfDMwy24FJsd9Lq6v9bF2WSfve9cw/exec", {
+
+            var formData = new FormData(event.target);
+            var params = new URLSearchParams(formData);
+
+            fetch("https://script.google.com/macros/s/AKfycbxypZl7BLS5ZHbubLI-ExGS4YD_A8AknptRKkw8RQGiV0l1mibqsDZtiozamJ_74Argvg/exec", {
                 method: "POST",
-                body: formData
-            }).then(response => response.json())
-              .then(data => alert("Form başarıyla gönderildi!"))
-              .catch(error => alert("Bir hata oluştu."));
+                body: params
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("sonuc").innerText = data;
+            })
+            .catch(error => {
+                document.getElementById("sonuc").innerText = "Hata: " + error;
+            });
         });
     </script>
 </body>
 </html>
-
