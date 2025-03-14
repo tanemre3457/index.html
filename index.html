@@ -3,59 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anket Formu</title>
+    <title>SANOVİS Katılımcı Anketi</title>
 </head>
 <body>
     <h2>SANOVİS Katılımcı Anketi</h2>
-    <form id="anketForm">
-        <label>Email:</label>
-        <input type="email" name="Email" required><br><br>
+    <form id="surveyForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="Email" required><br><br>
 
-        <label>Telefon:</label>
-        <input type="tel" name="Telefon" required><br><br>
+        <label for="telefon">Telefon:</label>
+        <input type="tel" id="telefon" name="Telefon" required><br><br>
 
-        <label>Revolax Ziyaret:</label>
-        <input type="text" name="RevolaxZiyaret"><br><br>
+        <p>Revolax standını ziyaret ettiniz mi?</p>
+        <input type="radio" id="revolaxEvet" name="RevolaxZiyaret" value="Evet">
+        <label for="revolaxEvet">Evet</label>
+        <input type="radio" id="revolaxHayir" name="RevolaxZiyaret" value="Hayır">
+        <label for="revolaxHayir">Hayır</label><br><br>
 
-        <label>Polytech Sebep:</label>
-        <input type="text" name="PolytechSebep"><br><br>
+        <p>Polytech’i neden kullanmıyorsunuz? (Birden fazla seçebilirsiniz)</p>
+        <input type="checkbox" id="fiyat" name="PolytechSebep[]" value="Fiyat">
+        <label for="fiyat">Fiyat</label>
+        <input type="checkbox" id="bilgiEksikligi" name="PolytechSebep[]" value="Ürün bilgisi eksikliği">
+        <label for="bilgiEksikligi">Ürün bilgisi eksikliği</label>
+        <input type="checkbox" id="alternatif" name="PolytechSebep[]" value="Alternatif ürün tercih ediyorum">
+        <label for="alternatif">Alternatif ürün tercih ediyorum</label><br><br>
 
-        <label>Polytech Bilgi:</label>
-        <input type="text" name="PolytechBilgi"><br><br>
+        <p>Polytech hakkında bilginiz var mı?</p>
+        <input type="radio" id="polytechEvet" name="PolytechBilgi" value="Evet">
+        <label for="polytechEvet">Evet</label>
+        <input type="radio" id="polytechHayir" name="PolytechBilgi" value="Hayır">
+        <label for="polytechHayir">Hayır</label><br><br>
 
-        <label>Polytech Kullanmama:</label>
-        <input type="text" name="PolytechKullanmama"><br><br>
+        <p>Daha önce Polytech kullandınız mı?</p>
+        <input type="radio" id="polytechKullaniciEvet" name="PolytechKullanici" value="Evet">
+        <label for="polytechKullaniciEvet">Evet</label>
+        <input type="radio" id="polytechKullaniciHayir" name="PolytechKullanici" value="Hayır">
+        <label for="polytechKullaniciHayir">Hayır</label><br><br>
 
-        <label>Polytech Kullanıcı:</label>
-        <input type="text" name="PolytechKullanici"><br><br>
+        <p>Sanovis ile nasıl iletişime geçmek istersiniz? (Birden fazla seçebilirsiniz)</p>
+        <input type="checkbox" id="telefonIletisim" name="SanovisIletisim[]" value="Telefon">
+        <label for="telefonIletisim">Telefon</label>
+        <input type="checkbox" id="emailIletisim" name="SanovisIletisim[]" value="E-posta">
+        <label for="emailIletisim">E-posta</label>
+        <input type="checkbox" id="whatsapp" name="SanovisIletisim[]" value="WhatsApp">
+        <label for="whatsapp">WhatsApp</label><br><br>
 
-        <label>Sanovis İletişim:</label>
-        <input type="text" name="SanovisIletisim"><br><br>
-
-        <button type="submit">Gönder</button>
+        <button type="button" onclick="submitForm()">Gönder</button>
     </form>
 
-    <p id="sonuc"></p>
-
     <script>
-        document.getElementById("anketForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-
-            var formData = new FormData(event.target);
-            var params = new URLSearchParams(formData);
+        function submitForm() {
+            var form = document.getElementById("surveyForm");
+            var formData = new FormData(form);
 
             fetch("https://script.google.com/macros/s/AKfycbxypZl7BLS5ZHbubLI-ExGS4YD_A8AknptRKkw8RQGiV0l1mibqsDZtiozamJ_74Argvg/exec", {
                 method: "POST",
-                body: params
+                body: formData
             })
             .then(response => response.text())
-            .then(data => {
-                document.getElementById("sonuc").innerText = data;
-            })
-            .catch(error => {
-                document.getElementById("sonuc").innerText = "Hata: " + error;
-            });
-        });
+            .then(data => alert(data))
+            .catch(error => alert("Hata oluştu, tekrar deneyin."));
+        }
     </script>
 </body>
 </html>
+
