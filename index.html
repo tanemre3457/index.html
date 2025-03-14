@@ -43,7 +43,7 @@
         document.getElementById("surveyForm").addEventListener("submit", function(event) {
             event.preventDefault();
             let formData = new FormData(this);
-            fetch("https://script.google.com/macros/s/YOUR_SCRIPT_URL/exec", {
+            fetch("https://script.google.com/macros/s/AKfycbxp6L6k1ateTmEJCsfIyUTepkFP0KPJ82z55IhIksfDMwy24FJsd9Lq6v9bF2WSfve9cw/exec", {
                 method: "POST",
                 body: formData
             }).then(response => response.json())
